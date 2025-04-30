@@ -1,4 +1,7 @@
+from selenium.webdriver.support.wait import WebDriverWait
+
 from libs.ui.pages.base_page import BasePage
+from libs.ui.pages.locators.locators_global import LOGO
 
 
 class PageMain(BasePage):
@@ -10,9 +13,11 @@ class PageMain(BasePage):
 
     def open(self) -> None:
         self.driver.get(self.url)
+        self.wait_until_loaded()
 
     def is_open(self) -> bool:
-        pass
+        return self.driver.find_element(*LOGO).is_displayed()
 
     def wait_until_loaded(self) -> None:
-        pass
+        WebDriverWait(self.driver, 10).until(
+            lambda drv: drv.execute_script("return document.readyState") == "complete")
