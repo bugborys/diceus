@@ -36,4 +36,5 @@ class TestCareers:
     @pytest.mark.parametrize('block_name', ['Locations', 'Teams', 'Life'])
     def test_blocks(self, careers_page, block_name):
         page = careers_page
+        page.scroll_to_block(block_name)
         assert page.is_block_loaded_on_page(block_name)
