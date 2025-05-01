@@ -15,20 +15,20 @@ class TestPetStoreAPI:
             "status": "available"
         }
 
-    # C
+    @pytest.mark.api # CREATE
     def test_create_pet(self, pet_data):
         response = requests.post(BASE_URL, json=pet_data)
         assert response.status_code == 200
         assert response.json()["name"] == pet_data["name"]
 
-    # R
+    @pytest.mark.api # READ
     def test_get_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         response = requests.get(f"{BASE_URL}/{pet_data['id']}")
         assert response.status_code == 200
         assert response.json()["id"] == pet_data["id"]
 
-    # U
+    @pytest.mark.api # UPDATE
     def test_update_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         pet_data["name"] = "Santa"
@@ -38,26 +38,34 @@ class TestPetStoreAPI:
         assert response.json()["name"] == "Santa"
         assert response.json()["status"] == "unavailable"
 
-    #D
+    @pytest.mark.api # DELETE
     def test_delete_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         response = requests.delete(f"{BASE_URL}/{pet_data['id']}")
         assert response.status_code == 200
 
+    @pytest.mark.api
+    @pytest.mark.negative
     def test_get_deleted_pet_returns_404(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         requests.delete(f"{BASE_URL}/{pet_data['id']}")
         response = requests.get(f"{BASE_URL}/{pet_data['id']}")
         assert response.status_code == 404
 
+    @pytest.mark.api
+    @pytest.mark.negative
     def test_create_pet_with_invalid_body(self):
         response = requests.post(BASE_URL, data="some incorrect data")
         assert response.status_code in [415, 500]
 
+    @pytest.mark.api
+    @pytest.mark.negative
     def test_get_pet_with_invalid_id(self):
         response = requests.get(f"{BASE_URL}/some_invalid_id")
         assert response.status_code == 404
 
+    @pytest.mark.api
+    @pytest.mark.negative
     def test_delete_pet_with_nonexistent_id(self):
         response = requests.delete(f"{BASE_URL}/9999999999999")
         assert response.status_code in [404, 200]
