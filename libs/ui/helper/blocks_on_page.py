@@ -1,9 +1,7 @@
-from argparse import ArgumentError
-
-from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 
+from libs.ui.helper.common import scroll_by_js
 from libs.ui.pages.locators import locators_careers
 
 blocks = {
@@ -21,11 +19,6 @@ def is_block_loaded(driver: WebDriver, name: str) -> bool:
     element = driver.find_element(*locator)
     is_loaded = element.is_displayed()
     return is_loaded
-
-
-def scroll_by_js(driver: WebDriver, element: WebElement, block: str = 'center') -> None:
-    driver.execute_script(
-        "arguments[0].scrollIntoView({behavior: 'auto', block: arguments[1]});", element, block)
 
 
 def scroll_to_element(driver: WebDriver, name: str) -> None:
