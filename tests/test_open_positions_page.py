@@ -1,11 +1,13 @@
 import pytest
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
 
 from libs.ui.helper.open_positions import is_all_job_cards_has_required_info
 from libs.ui.helper.waiters import switch_to_last_tab, switch_to_first_tab
 from libs.ui.pages.locators.locators_page_open_positions import POSITION_VIEW_BUTTON
 from libs.ui.pages.page_careers_qa import PageCareersQA
 from libs.ui.pages.page_open_positions import PageOpenPositions
+from libs.ui.pages.unknown_page import UnknownPage
 
 
 @pytest.mark.usefixtures("browser")
@@ -54,6 +56,7 @@ class TestQualityAssurance:
         old_url = page.driver.current_url
         details_button.click()
         switch_to_last_tab(page.driver)
+        UnknownPage().wait_until_loaded()
         current_url = page.driver.current_url
         page.driver.close()
         switch_to_first_tab(page.driver)

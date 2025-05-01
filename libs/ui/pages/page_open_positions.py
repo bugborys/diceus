@@ -1,12 +1,12 @@
 import time
-from typing import List
 
 from selenium.webdriver import ActionChains
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+from libs.ui.helper.common import scroll_by_js
 from libs.ui.pages.base_page import BasePage
 from libs.ui.pages.locators.locators_page_open_positions import POSITION_LIST, LOCATION_SELECT, DEPARTMENTS_SELECT, \
     POSITION_ITEM
@@ -31,14 +31,29 @@ class PageOpenPositions(BasePage):
             lambda drv: drv.execute_script("return document.readyState") == "complete")
 
     def filter_by_location(self, name: str, timeout: int = 5) -> None:
-        locations_root = self.driver.find_element(*LOCATION_SELECT)
-        locations_select = Select(locations_root)
-        self.__wait_until_locations_loaded(locations_select, timeout=timeout)
-        locations_select.select_by_visible_text(name)
+        locations_root = WebDriverWait(self.driver, timeout).until(
+            ec.presence_of_element_located(LOCATION_SELECT)
+        )
+        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", locations_root)
+
+        select = Select(locations_root)
+        WebDriverWait(self.driver, timeout).until(lambda d: len(select.options) > 1)
+
+        values = [opt.text.strip() for opt in select.options]
+        if name not in values:
+            raise ValueError(f"Location option '{name}' not found. Available: {values}")
+
+        for opt in select.options:
+            if opt.text.strip() == name:
+                self.driver.execute_script("arguments[0].selected = true;", opt)
+                self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", locations_root)
+                break
+
+        self.__wait_until_job_cards_reloaded()
 
     def filter_by_department(self, name, refresh: bool = False, count: int = 1) -> None:
         if refresh:
-            self.__reload_department_filter(department=name, count=count)
+            self._reload_department_filter(department=name, count=count)
         else:
             department_root = self.driver.find_element(*DEPARTMENTS_SELECT)
             departments = Select(department_root)
@@ -51,8 +66,7 @@ class PageOpenPositions(BasePage):
 
     def scroll_to_element_by_js(self, element):
         for i in range(2):
-            self.driver.execute_script(
-                "arguments[0].scrollIntoView({behavior: 'auto', block: 'start'});", element)
+            scroll_by_js(self.driver, element=element, block='center')
             time.sleep(0.3)
 
     def hover_on_position(self, position: WebElement) -> None:
@@ -90,14 +104,36 @@ class PageOpenPositions(BasePage):
                 last_exception = e
             time.sleep(poll)
 
-    def __reload_department_filter(self, department: str = None, count: int = 1):
+    def _reload_department_filter(self, department: str = None, count: int = 1):
         for i in range(count):
-            department_root = self.driver.find_element(*DEPARTMENTS_SELECT)
-            departments = Select(department_root)
-            departments.select_by_index(0)
+            department_root = WebDriverWait(self.driver, 10).until(
+                ec.presence_of_element_located(DEPARTMENTS_SELECT)
+            )
+            self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", department_root)
+            select = Select(department_root)
+
+            WebDriverWait(self.driver, 10).until(lambda d: len(select.options) > 1)
+
+            default_option = select.options[0]
+            self.driver.execute_script("arguments[0].selected = true;", default_option)
+            self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", department_root)
             self.__wait_until_job_cards_reloaded()
+
             if department:
-                departments.select_by_visible_text(department)
+                matched = False
+                for opt in select.options:
+                    if opt.text.strip() == department:
+                        self.driver.execute_script("arguments[0].selected = true;", opt)
+                        self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", department_root)
+                        matched = True
+                        break
+                if not matched:
+                    options = [opt.text.strip() for opt in select.options]
+                    raise ValueError(f"Department '{department}' not found. Available: {options}")
             else:
-                departments.select_by_index(1)
+                if len(select.options) > 1:
+                    next_option = select.options[1]
+                    self.driver.execute_script("arguments[0].selected = true;", next_option)
+                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('change'));", department_root)
+
             self.__wait_until_job_cards_reloaded()
