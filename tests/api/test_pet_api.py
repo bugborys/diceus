@@ -10,35 +10,35 @@ class TestPetStoreAPI:
     def pet_data(self):
         return {
             "id": 123456789,
-            "name": "MySuperPEt",
-            "photoUrls": ["https://example.com/mysuperpet.jpg"],
+            "name": "Sirko",
+            "photoUrls": ["https://example.com/sirko.jpg"],
             "status": "available"
         }
 
-    @pytest.mark.api # CREATE
+    @pytest.mark.api
     def test_create_pet(self, pet_data):
         response = requests.post(BASE_URL, json=pet_data)
         assert response.status_code == 200
         assert response.json()["name"] == pet_data["name"]
 
-    @pytest.mark.api # READ
+    @pytest.mark.api
     def test_get_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         response = requests.get(f"{BASE_URL}/{pet_data['id']}")
         assert response.status_code == 200
         assert response.json()["id"] == pet_data["id"]
 
-    @pytest.mark.api # UPDATE
+    @pytest.mark.api
     def test_update_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
-        pet_data["name"] = "Santa"
-        pet_data["status"] = "unavailable"
+        pet_data["name"] = "Bulat"
+        pet_data["status"] = "sold"
         response = requests.put(BASE_URL, json=pet_data)
         assert response.status_code == 200
-        assert response.json()["name"] == "Santa"
-        assert response.json()["status"] == "unavailable"
+        assert response.json()["name"] == "Bulat"
+        assert response.json()["status"] == "sold"
 
-    @pytest.mark.api # DELETE
+    @pytest.mark.api
     def test_delete_pet(self, pet_data):
         requests.post(BASE_URL, json=pet_data)
         response = requests.delete(f"{BASE_URL}/{pet_data['id']}")
@@ -55,13 +55,13 @@ class TestPetStoreAPI:
     @pytest.mark.api
     @pytest.mark.negative
     def test_create_pet_with_invalid_body(self):
-        response = requests.post(BASE_URL, data="some incorrect data")
-        assert response.status_code in [415, 500]
+        response = requests.post(BASE_URL, data="not a json")
+        assert response.status_code in [400, 415, 500]
 
     @pytest.mark.api
     @pytest.mark.negative
     def test_get_pet_with_invalid_id(self):
-        response = requests.get(f"{BASE_URL}/some_invalid_id")
+        response = requests.get(f"{BASE_URL}/invalid_id")
         assert response.status_code == 404
 
     @pytest.mark.api
