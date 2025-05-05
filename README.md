@@ -24,31 +24,30 @@ On the hepsiburada.com website, product recommendations appear in several places
 - **Product pages** – related or complementary products (e.g., a case for a phone).
 - **Cart page** – items that are often bought together.
 
-These suggestions are not random. They’re based on what the user has viewed, searched for, or bought before. This information is remembered using **cookies** and sometimes **session/local storage** in the browser.
+These suggestions are not random. They’re based on what the user has viewed, searched for, or bought before.
+This information is remembered using **cookies** and sometimes **session/local storage** in the browser.
 
 This helps build a simple user profile and show more relevant items.
 
 In some cases, sellers may also pay to promote certain products in these blocks, so part of the list may be ads.
 
-Overall, the goal is to increase chances of purchase by showing what the user might want next — either based on their behavior, or through sponsored content.
+Overall, the goal is to increase chances of purchase by showing what the user might want next — either based on their 
+behavior, or through sponsored content.
 
-## 3. UI Test Scenario — useinsider.com
+## 3. UI Tests — useinsider.com
 
-UI automation scenario (Python + Selenium):
-1. Open https://useinsider.com and verify the homepage loads.
-2. Navigate to “Company” → “Careers” and ensure the Careers page is loaded. Validate that the “Locations”, “Teams”, and “Life at Insider” blocks are visible.
-3. Go to https://useinsider.com/careers/quality-assurance/, click “See all QA jobs”.
-4. Filter jobs by:
-   - **Location**: Istanbul, Turkey
-   - **Department**: Quality Assurance
-5. Ensure at least one job is listed and each job contains:
-   - “Quality Assurance” in the Position and Department fields
-   - “Istanbul, Turkey” in the Location field
-6. Click on the “View Role” button and check the redirection to the Lever Application page.
+UI automation scenario (used Python + raw Selenium):
 
 - Test code uses **Page Object Model (POM)** structure.
 - Test supports **Chrome** and **Firefox** via CLI parameters.
 - Takes screenshots on failure.
+
+I can use any wrapper frameworks for Selenium like Selene (https://github.com/yashaka/selene),
+as well as alternatives such as PlayWright. 
+
+In this example, in some places where scrolling was required, I used JavaScript calls instead of ActionChains()
+to ensure full cross-browser compatibility with Chrome and Firefox (since the latter had errors 
+that did not occur in Chrome)
 
 ## 4. API Tests — Swagger Petstore
 
